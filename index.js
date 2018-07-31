@@ -2,11 +2,18 @@
 //Once a token is received on req.user.token, use https://us.api.battle.net/wow/user/characters?access_token= to get character information.
 
 require('dotenv').config();
+const https = require('https');
+const fs = require('fs');
 const express = require('express');
 const session = require('express-session');
 const passport = require('passport');
 const strategy = require(`${__dirname}/strategy.js`);
 const { SECRET } = process.env;
+
+const httpsOptions = {
+  key: fs.readFileSync('./security/cert.key'),
+  cert: fs.readFileSync('./security/cert.pem')
+};
 
 const app = express();
 
@@ -57,4 +64,8 @@ app.get('/logout', function(req, res) {
 });
 
 const port = 3000;
-app.listen( port, () => { console.log(`Server listening on port ${port}`); } );
+const server = https.createServer( httpsOptions, app );
+
+server.listen( port, () => {
+  console.log( 'Express server listening on port ' + server.address().port );
+} );
